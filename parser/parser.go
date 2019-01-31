@@ -1,4 +1,4 @@
-package pakelib
+package parser
 
 import (
 	"fmt"
