@@ -10,6 +10,6 @@ type Command interface {
 }
 
 type CommandValidator interface {
-	IsValid(string) bool
+	CanHandle(string) bool
 	ValidateArgs([]string) bool
 }
