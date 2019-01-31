@@ -1,8 +1,10 @@
 package pakelib
 
-import "fmt"
-import "io/ioutil"
-import "strings"
+import (
+	"fmt"
+	"io/ioutil"
+	"strings"
+)
 
 type parser struct {
 	commandCandidates []CommandCandidate
