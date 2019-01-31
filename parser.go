@@ -43,11 +43,14 @@ func (p *parser) ParseLine(line string) (Command, error) {
 	}
 	for _, cmdCandidate := range p.commandCandidates {
 		validator := cmdCandidate.validator
-		if validator.IsValid(line) {
-			constructor := cmdCandidate.constructor
+		if validator.CanHandle(line) {
 			tokens := strings.Split(line, " ")
 			args := tokens[1:len(tokens)]
-			return constructor(args), nil
+			if validator.ValidateArgs(args) {
+				constructor := cmdCandidate.constructor
+				return constructor(args), nil
+			}
+			return nil, fmt.Errorf("At least one of the given argument is not valid")
 		}
 	}
 	return nil, fmt.Errorf("%s is not valid syntax", line)
