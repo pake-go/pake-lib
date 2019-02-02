@@ -1,5 +1,7 @@
 package config
 
+import "fmt"
+
 type Config struct {
 	current                map[string]string
 	old                    map[string]string
@@ -22,6 +24,13 @@ func WithSetTemporarilyAge(age int) *Config {
 	c := New()
 	c.setTemporarilyAge = age
 	return c
+}
+
+func (c *Config) Get(key string) (string, error) {
+	if val, ok := c.current[key]; ok {
+		return val, nil
+	}
+	return "", fmt.Errorf("Can't find value for %s", key)
 }
 
 func (c *Config) SetTemporarily(key, value string) {
