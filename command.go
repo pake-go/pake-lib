@@ -8,7 +8,7 @@ type CommandCandidate struct {
 }
 
 type Command interface {
-	Execute(*config.Config) (bool, error)
+	Execute(*config.Config) error
 }
 
 type CommandValidator interface {
