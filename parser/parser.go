@@ -4,52 +4,54 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strings"
+
+	pakelib "github.com/pake-go/pake-lib"
 )
 
 type parser struct {
-	commandCandidates []CommandCandidate
-	commentValidator  CommentValidator
+	commandCandidates []pakelib.CommandCandidate
+	commentValidator  pakelib.CommentValidator
 }
 
-func New(cmdCandidates []CommandCandidate, commentValidator CommentValidator) *parser {
+func New(cmdCandidates []pakelib.CommandCandidate, commentValidator pakelib.CommentValidator) *parser {
 	return &parser{
 		commandCandidates: cmdCandidates,
 		commentValidator:  commentValidator,
 	}
 }
 
-func (p *parser) ParseFile(filename string) ([]Command, error) {
+func (p *parser) ParseFile(filename string) ([]pakelib.Command, error) {
 	fileContent, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return []Command{}, err
+		return []pakelib.Command{}, err
 	}
 	return p.ParseString(string(fileContent))
 }
 
-func (p *parser) ParseString(str string) ([]Command, error) {
-	var commands []Command
+func (p *parser) ParseString(str string) ([]pakelib.Command, error) {
+	var commands []pakelib.Command
 	lines := strings.Split(str, "\n")
 	for _, line := range lines {
 		command, err := p.ParseLine(line)
 		if err != nil {
-			return []Command{}, err
+			return []pakelib.Command{}, err
 		}
 		commands = append(commands, command)
 	}
 	return commands, nil
 }
 
-func (p *parser) ParseLine(line string) (Command, error) {
+func (p *parser) ParseLine(line string) (pakelib.Command, error) {
 	if p.commentValidator.IsValid(line) {
-		return &Comment{}, nil
+		return &pakelib.Comment{}, nil
 	}
 	for _, cmdCandidate := range p.commandCandidates {
-		validator := cmdCandidate.validator
+		validator := cmdCandidate.Validator
 		if validator.CanHandle(line) {
 			tokens := strings.Split(line, " ")
 			args := tokens[1:len(tokens)]
 			if validator.ValidateArgs(args) {
-				constructor := cmdCandidate.constructor
+				constructor := cmdCandidate.Constructor
 				return constructor(args), nil
 			}
 			return nil, fmt.Errorf("At least one of the given argument is not valid")

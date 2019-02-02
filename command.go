@@ -3,8 +3,8 @@ package pakelib
 import "github.com/pake-go/pake-lib/config"
 
 type CommandCandidate struct {
-	validator   CommandValidator
-	constructor func([]string) Command
+	Validator   CommandValidator
+	Constructor func([]string) Command
 }
 
 type Command interface {
