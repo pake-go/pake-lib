@@ -33,9 +33,10 @@ func (p *parser) ParseFile(filename string, logger *log.Logger) ([]pakelib.Comma
 
 func (p *parser) ParseString(str string, logger *log.Logger) ([]pakelib.Command, error) {
 	var commands []pakelib.Command
+	silentLogger := log.New(ioutil.Discard, "", log.LstdFlags)
 	lines := strings.Split(str, "\n")
 	for linenum, line := range lines {
-		command, err := p.ParseLine(line, logger)
+		command, err := p.ParseLine(line, silentLogger)
 		if err != nil {
 			errMsg := fmt.Errorf("An error occured on line %d: %s", linenum+1, err.Error())
 			logger.Println(errMsg.Error())
@@ -50,16 +51,16 @@ func (p *parser) ParseLine(line string, logger *log.Logger) (pakelib.Command, er
 	if p.commentValidator.IsValid(line) {
 		return &pakelib.Comment{}, nil
 	}
+
+	tokens, err := GetTokens(line)
+	if err != nil {
+		logger.Println(err.Error())
+		return nil, err
+	}
+	args := tokens[1:len(tokens)]
 	for _, cmdCandidate := range p.commandCandidates {
 		validator := cmdCandidate.Validator
 		if validator.CanHandle(line) {
-			tokens, err := GetTokens(line)
-			if err != nil {
-				logger.Println(err.Error())
-				return nil, err
-			}
-			args := tokens[1:len(tokens)]
-
 			if validator.ValidateArgs(args) {
 				constructor := cmdCandidate.Constructor
 				return constructor(args), nil
@@ -69,7 +70,7 @@ func (p *parser) ParseLine(line string, logger *log.Logger) (pakelib.Command, er
 			return nil, errMsg
 		}
 	}
-	errMsg := fmt.Errorf("%s is not valid syntax", line)
+	errMsg := fmt.Errorf("%s is not a valid command", tokens[0])
 	logger.Println(errMsg.Error())
 	return nil, errMsg
 }
