@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"encoding/csv"
 	"fmt"
 	"io/ioutil"
 	"strings"
@@ -48,8 +49,12 @@ func (p *parser) ParseLine(line string) (pakelib.Command, error) {
 	for _, cmdCandidate := range p.commandCandidates {
 		validator := cmdCandidate.Validator
 		if validator.CanHandle(line) {
-			tokens := strings.Split(line, " ")
+			tokens, err := GetTokens(line)
+			if err != nil {
+				return nil, err
+			}
 			args := tokens[1:len(tokens)]
+
 			if validator.ValidateArgs(args) {
 				constructor := cmdCandidate.Constructor
 				return constructor(args), nil
@@ -58,4 +63,10 @@ func (p *parser) ParseLine(line string) (pakelib.Command, error) {
 		}
 	}
 	return nil, fmt.Errorf("%s is not valid syntax", line)
+}
+
+func GetTokens(str string) ([]string, error) {
+	r := csv.NewReader(strings.NewReader(str))
+	r.Comma = ' '
+	return r.Read()
 }
