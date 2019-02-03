@@ -1,0 +1,6 @@
+github.com/PGo-Projects/output v0.0.0-20181030161838-eb5f9fd060a4 h1:Mxz1xpGy39ki7vcVPtChtGHd8TCPOCREYFqTaTbMj2c=
+github.com/PGo-Projects/output v0.0.0-20181030161838-eb5f9fd060a4/go.mod h1:sFKzl/RKdoOKcqPo9SWoLHacqsnd4oe9dcvYtinV69Q=
+github.com/buger/goterm v0.0.0-20180423150900-6d19e6a8df12 h1:aZVdiV35VTHoMJnL2GcJFxuedXBJUJx5YRw1sif1XN4=
+github.com/buger/goterm v0.0.0-20180423150900-6d19e6a8df12/go.mod h1:u9UyCz2eTrSGy6fbupqJ54eY5c4IC8gREQ1053dK12U=
+golang.org/x/sys v0.0.0-20181030150119-7e31e0c00fa0 h1:biUuj9O+0+XckRUCDzjoOGm6yFV5c0IHbm1ODP3e4Zw=
+golang.org/x/sys v0.0.0-20181030150119-7e31e0c00fa0/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=

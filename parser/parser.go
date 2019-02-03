@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"strings"
 
 	pakelib "github.com/pake-go/pake-lib"
@@ -14,35 +15,38 @@ type parser struct {
 	commentValidator  pakelib.CommentValidator
 }
 
-func New(cmdCandidates []pakelib.CommandCandidate, commentValidator pakelib.CommentValidator) *parser {
+func New(cmdCandidates []pakelib.CommandCandidate, cv pakelib.CommentValidator) *parser {
 	return &parser{
 		commandCandidates: cmdCandidates,
-		commentValidator:  commentValidator,
+		commentValidator:  cv,
 	}
 }
 
-func (p *parser) ParseFile(filename string) ([]pakelib.Command, error) {
+func (p *parser) ParseFile(filename string, logger *log.Logger) ([]pakelib.Command, error) {
 	fileContent, err := ioutil.ReadFile(filename)
 	if err != nil {
+		logger.Println(err.Error())
 		return []pakelib.Command{}, err
 	}
-	return p.ParseString(string(fileContent))
+	return p.ParseString(string(fileContent), logger)
 }
 
-func (p *parser) ParseString(str string) ([]pakelib.Command, error) {
+func (p *parser) ParseString(str string, logger *log.Logger) ([]pakelib.Command, error) {
 	var commands []pakelib.Command
 	lines := strings.Split(str, "\n")
-	for _, line := range lines {
-		command, err := p.ParseLine(line)
+	for linenum, line := range lines {
+		command, err := p.ParseLine(line, logger)
 		if err != nil {
-			return []pakelib.Command{}, err
+			errMsg := fmt.Errorf("An error occured on line %d: %s", linenum+1, err.Error())
+			logger.Println(errMsg.Error())
+			return []pakelib.Command{}, errMsg
 		}
 		commands = append(commands, command)
 	}
 	return commands, nil
 }
 
-func (p *parser) ParseLine(line string) (pakelib.Command, error) {
+func (p *parser) ParseLine(line string, logger *log.Logger) (pakelib.Command, error) {
 	if p.commentValidator.IsValid(line) {
 		return &pakelib.Comment{}, nil
 	}
@@ -51,6 +55,7 @@ func (p *parser) ParseLine(line string) (pakelib.Command, error) {
 		if validator.CanHandle(line) {
 			tokens, err := GetTokens(line)
 			if err != nil {
+				logger.Println(err.Error())
 				return nil, err
 			}
 			args := tokens[1:len(tokens)]
@@ -59,10 +64,14 @@ func (p *parser) ParseLine(line string) (pakelib.Command, error) {
 				constructor := cmdCandidate.Constructor
 				return constructor(args), nil
 			}
-			return nil, fmt.Errorf("At least one of the given argument is not valid")
+			errMsg := fmt.Errorf("At least one of the arguments is not valid: %+q", args)
+			logger.Println(errMsg.Error())
+			return nil, errMsg
 		}
 	}
-	return nil, fmt.Errorf("%s is not valid syntax", line)
+	errMsg := fmt.Errorf("%s is not valid syntax", line)
+	logger.Println(errMsg.Error())
+	return nil, errMsg
 }
 
 func GetTokens(str string) ([]string, error) {

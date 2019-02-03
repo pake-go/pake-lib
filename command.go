@@ -1,6 +1,10 @@
 package pakelib
 
-import "github.com/pake-go/pake-lib/config"
+import (
+	"log"
+
+	"github.com/pake-go/pake-lib/config"
+)
 
 type CommandCandidate struct {
 	Validator   CommandValidator
@@ -8,7 +12,7 @@ type CommandCandidate struct {
 }
 
 type Command interface {
-	Execute(*config.Config) error
+	Execute(*config.Config, *log.Logger) error
 }
 
 type CommandValidator interface {
