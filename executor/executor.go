@@ -14,7 +14,7 @@ func Run(commands []pakelib.Command, logger *log.Logger) {
 	for line, command := range commands {
 		err := command.Execute(cfg, logger)
 		if err != nil {
-			errMsg := fmt.Errorf("There was an error at line %d: %s", line, err.Error())
+			errMsg := fmt.Errorf("There was an error at line %d: %s", line+1, err.Error())
 			output.Error(errMsg)
 		}
 		cfg.SmartReset()
