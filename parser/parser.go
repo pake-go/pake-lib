@@ -1,13 +1,13 @@
 package parser
 
 import (
-	"encoding/csv"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"strings"
 
 	pakelib "github.com/pake-go/pake-lib"
+	"github.com/pake-go/pake-lib/utils/argutil"
 )
 
 type parser struct {
@@ -52,7 +52,7 @@ func (p *parser) ParseLine(line string, logger *log.Logger) (pakelib.Command, er
 		return &pakelib.Comment{}, nil
 	}
 
-	tokens, err := GetTokens(line)
+	tokens, err := argutil.GetTokens(line)
 	if err != nil {
 		logger.Println(err.Error())
 		return nil, err
@@ -73,10 +73,4 @@ func (p *parser) ParseLine(line string, logger *log.Logger) (pakelib.Command, er
 	errMsg := fmt.Errorf("%s is not a valid command", tokens[0])
 	logger.Println(errMsg.Error())
 	return nil, errMsg
-}
-
-func GetTokens(str string) ([]string, error) {
-	r := csv.NewReader(strings.NewReader(str))
-	r.Comma = ' '
-	return r.Read()
 }
