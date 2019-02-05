@@ -43,7 +43,6 @@ func (c *Config) SetTemporarily(key, value string) {
 }
 
 func (c *Config) SetPermanently(key, value string) {
-	c.Reset()
 	c.current[key] = value
 }
 
