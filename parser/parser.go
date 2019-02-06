@@ -1,3 +1,5 @@
+// Package parser provides functions for parsing strings and source files and converting it
+// into a list of commands that can be executed by executor.Run.
 package parser
 
 import (
@@ -10,11 +12,16 @@ import (
 	"github.com/pake-go/pake-lib/utils/argutil"
 )
 
+// Parser implements a parser for converting strings and source files into a list of commands.
 type parser struct {
+	// Represents a list of CommandCandidate, a bundle of the command's validator and the
+	// command's constructor.
 	commandCandidates []pakelib.CommandCandidate
-	commentValidator  pakelib.CommentValidator
+	// Represents the function used to check if a string is a valid comment.
+	commentValidator pakelib.CommentValidator
 }
 
+// New returns a parser for converting source files and strings into a list of commands.
 func New(cmdCandidates []pakelib.CommandCandidate, cv pakelib.CommentValidator) *parser {
 	return &parser{
 		commandCandidates: cmdCandidates,
@@ -22,6 +29,8 @@ func New(cmdCandidates []pakelib.CommandCandidate, cv pakelib.CommentValidator) 
 	}
 }
 
+// ParseFile takes in a filename and parses the content of the file to return a list of commands
+// that can be run by executor.Run along with any errors that was encountered.
 func (p *parser) ParseFile(filename string, logger *log.Logger) ([]pakelib.Command, error) {
 	fileContent, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -31,6 +40,8 @@ func (p *parser) ParseFile(filename string, logger *log.Logger) ([]pakelib.Comma
 	return p.ParseString(string(fileContent), logger)
 }
 
+// ParseString takes in a string and parses it to return a list of commands that can be run by
+// executor.Run along with any errors that was encountered.
 func (p *parser) ParseString(str string, logger *log.Logger) ([]pakelib.Command, error) {
 	var commands []pakelib.Command
 	silentLogger := log.New(ioutil.Discard, "", log.LstdFlags)
@@ -47,6 +58,9 @@ func (p *parser) ParseString(str string, logger *log.Logger) ([]pakelib.Command,
 	return commands, nil
 }
 
+// ParseLine takes a string that represent one line of code in the language and parses it to
+// return a list of commands that can be run by executor.Run along with any errors that were
+// encountered.
 func (p *parser) ParseLine(line string, logger *log.Logger) (pakelib.Command, error) {
 	if p.commentValidator.IsValid(line) {
 		return &pakelib.Comment{}, nil

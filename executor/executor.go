@@ -1,3 +1,4 @@
+// Package executor provides a default function for executing commands returned by the parser.
 package executor
 
 import (
@@ -9,6 +10,8 @@ import (
 	"github.com/pake-go/pake-lib/config"
 )
 
+// Run iterates through the list of commands passed to it and calls the Execute() function for
+// each of them.
 func Run(commands []pakelib.Command, logger *log.Logger) {
 	cfg := config.New()
 	for line, command := range commands {
