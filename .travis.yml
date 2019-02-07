@@ -1,0 +1,5 @@
+language: go
+env:
+  - GO111MODULE=on
+go_import_path: github.com/pake-go/pake-lib
+script: go test -v ./...
