@@ -11,24 +11,22 @@ type Config struct {
 	current map[string]string
 	// Old represents the previous state of the configuration.
 	old map[string]string
-	// How many times reset has been called.
-	lastRanResetCallAge int
+	// SetTemporarilyAgeTracker tracks how many SmartReset() calls were
+	// made for each key whose value was modified by SetTemporarily().
+	setTemporarilyAgeTracker map[string]int
 	// How many SmartReset() calls may be called before a flag that is set
 	// temporarily is cleared.
 	setTemporarilyAge int
-	// Represents if a flag has been set temporarily.
-	setTemporarilyIsActive bool
 }
 
 // New returns a Config which allows you to change the behavior of the language
 // during runtime by retrieving and setting flags.
 func New() *Config {
 	return &Config{
-		current:                make(map[string]string),
-		old:                    make(map[string]string),
-		lastRanResetCallAge:    0,
-		setTemporarilyAge:      1,
-		setTemporarilyIsActive: false,
+		current:                  make(map[string]string),
+		old:                      make(map[string]string),
+		setTemporarilyAgeTracker: make(map[string]int),
+		setTemporarilyAge:        1,
 	}
 }
 
@@ -51,12 +49,11 @@ func (c *Config) Get(key string) (string, error) {
 // SetTemporarily sets the value of the given key until SmartReset() has been called
 // setTemporarilyAge times.
 func (c *Config) SetTemporarily(key, value string) {
-	c.Reset()
-	c.setTemporarilyIsActive = true
 	if oldValue, ok := c.current[key]; ok {
 		c.old[key] = oldValue
 	}
 	c.current[key] = value
+	c.setTemporarilyAgeTracker[key] = 0
 }
 
 // SetPermanently sets the value of the given key until a new value has been specified
@@ -68,25 +65,29 @@ func (c *Config) SetPermanently(key, value string) {
 // Reset would clear the effect of the SetTemporarily regardless of how many SmartReset()
 // calls has been done.
 func (c *Config) Reset() {
+	for key, _ := range c.setTemporarilyAgeTracker {
+		delete(c.current, key)
+	}
 	for name, val := range c.old {
 		c.current[name] = val
 	}
 	c.old = make(map[string]string)
+	c.setTemporarilyAgeTracker = make(map[string]int)
 }
 
 // SmartReset checks to see if a flag that has been set temporarily should be cleared
-// before clearing it.  This is meant to be ran every time a command has finished executing.
-//
-// Bug(pchan): If multiple SetTemporarily() has been called and setTemporarilyAge > 1, then all
-// flags set by SetTemporarily would be cleared once the first one needs to be cleared.
+// before clearing it.  This is meant to be ran every time a command has finished
+// executing.
 func (c *Config) SmartReset() {
-	if !c.setTemporarilyIsActive {
-		return
+	for key, age := range c.setTemporarilyAgeTracker {
+		if age >= c.setTemporarilyAge {
+			delete(c.current, key)
+			delete(c.setTemporarilyAgeTracker, key)
+			if value, ok := c.old[key]; ok {
+				c.current[key] = value
+			}
+		} else {
+			c.setTemporarilyAgeTracker[key] += 1
+		}
 	}
-	if c.lastRanResetCallAge > c.setTemporarilyAge {
-		c.Reset()
-		c.lastRanResetCallAge = 0
-		return
-	}
-	c.lastRanResetCallAge += 1
 }
