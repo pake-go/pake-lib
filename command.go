@@ -29,6 +29,6 @@ type CommandValidator interface {
 	// CanHandle checks to see if the command can handle the given string.
 	CanHandle(string) bool
 	// ValidateArgs checks to see if the list of strings given are valid
-	// arguments for the command.
-	ValidateArgs([]string) bool
+	// arguments for the command and returns an error if it is not.
+	ValidateArgs([]string) error
 }

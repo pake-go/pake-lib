@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"errors"
 	"io/ioutil"
 	"log"
 	"reflect"
@@ -169,8 +170,8 @@ func (hv *helloValidator) CanHandle(line string) bool {
 	return strings.HasPrefix(line, "hello ")
 }
 
-func (hv *helloValidator) ValidateArgs(args []string) bool {
-	return true
+func (hv *helloValidator) ValidateArgs(args []string) error {
+	return nil
 }
 
 type bye struct {
@@ -194,8 +195,8 @@ func (bv *byeValidator) CanHandle(line string) bool {
 	return strings.HasPrefix(line, "bye ")
 }
 
-func (bv *byeValidator) ValidateArgs(args []string) bool {
-	return true
+func (bv *byeValidator) ValidateArgs(args []string) error {
+	return nil
 }
 
 type byeWithError struct {
@@ -219,8 +220,8 @@ func (bwev *byeWithErrorValidator) CanHandle(line string) bool {
 	return strings.HasPrefix(line, "byeWithError ")
 }
 
-func (bwev *byeWithErrorValidator) ValidateArgs(args []string) bool {
-	return false
+func (bwev *byeWithErrorValidator) ValidateArgs(args []string) error {
+	return errors.New("The arg is no good")
 }
 
 var helloCandidate = pakelib.CommandCandidate{

@@ -75,13 +75,13 @@ func (p *Parser) ParseLine(line string, logger *log.Logger) (pakelib.Command, er
 	for _, cmdCandidate := range p.commandCandidates {
 		validator := cmdCandidate.Validator
 		if validator.CanHandle(line) {
-			if validator.ValidateArgs(args) {
+			err := validator.ValidateArgs(args)
+			if err == nil {
 				constructor := cmdCandidate.Constructor
 				return constructor(args), nil
 			}
-			errMsg := fmt.Errorf("At least one of the arguments is not valid: %+q", args)
-			logger.Println(errMsg.Error())
-			return nil, errMsg
+			logger.Println(err.Error())
+			return nil, err
 		}
 	}
 	errMsg := fmt.Errorf("%s is not a valid command", tokens[0])
