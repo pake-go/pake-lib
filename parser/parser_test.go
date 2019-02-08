@@ -224,16 +224,16 @@ func (bwev *byeWithErrorValidator) ValidateArgs(args []string) bool {
 }
 
 var helloCandidate = pakelib.CommandCandidate{
-	&helloValidator{},
-	newHello,
+	Validator:   &helloValidator{},
+	Constructor: newHello,
 }
 
 var byeCandidate = pakelib.CommandCandidate{
-	&byeValidator{},
-	newBye,
+	Validator:   &byeValidator{},
+	Constructor: newBye,
 }
 
 var byeWithErrorCandidate = pakelib.CommandCandidate{
-	&byeWithErrorValidator{},
-	newByeWithError,
+	Validator:   &byeWithErrorValidator{},
+	Constructor: newByeWithError,
 }
